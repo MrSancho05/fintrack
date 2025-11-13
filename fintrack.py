@@ -43,6 +43,26 @@ class PDFInvoiceGenerator(InvoiceGenerator):
         
         c.save()
 
+from openpyxl import Workbook
+class ExcelInvoiceGenerator(InvoiceGenerator):
+    def generate_invoice(self, output_path):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Invoice'
+
+        ws.append(['Mahsulot nomi', 'Narxi'])
+
+        for item in self.items:
+            ws.append([items['name'], item['price']])
+
+        ws.append([])
+
+        ws.append(['Jami summa: ', self.calculate_total()])
+        ws.append(['Yaratilgan vaqt : ', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+
+        wb.save(output_path)
+
+
 
 if __name__ == '__main__':
     items = [
