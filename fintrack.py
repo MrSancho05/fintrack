@@ -53,7 +53,7 @@ class ExcelInvoiceGenerator(InvoiceGenerator):
         ws.append(['Mahsulot nomi', 'Narxi'])
 
         for item in self.items:
-            ws.append([items['name'], item['price']])
+            ws.append([item['name'], item['price']])
 
         ws.append([])
 
@@ -62,7 +62,35 @@ class ExcelInvoiceGenerator(InvoiceGenerator):
 
         wb.save(output_path)
 
+class HTMLInvoiceGenerator(InvoiceGenerator):
+    def generate_invoice(self, output_path):
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Hisob-faktura</title>
+            <meta charset="utf-8">
+        </head>
+        <body>
+            <h1>Hisob-faktura</h1>
+            <p>Mijoz: {self.client_name}</p>
+            <p>Yaratilgan sana: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <h2>Mahsulotlar</h2>
+            <ul>
+        """
 
+        for item in self.items:
+            html_content += f"<li>{item['name']} - ${item['price']:.2f}</li>"
+
+        html_content += f"""
+        </ul>
+            <h3>Jami summa: ${self.calculate_total():.2f}</h3>
+        </body>
+        </html>
+        """
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
 
 if __name__ == '__main__':
     items = [
@@ -76,5 +104,11 @@ if __name__ == '__main__':
     pdf_generator = PDFInvoiceGenerator(client_name, items)
     pdf_generator.generate_invoice('faktura.pdf')
 
-    print('PDF fakturasi muvaffaqiyatli yaratildi!')
+    excel_generator = ExcelInvoiceGenerator(client_name, items)
+    excel_generator.generate_invoice('faktura.xlsx')
+
+    html_generator = HTMLInvoiceGenerator(client_name, items)
+    html_generator.generate_invoice('faktura.html')
+
+    print('Barcha fakturalar yaratildi)')
 
